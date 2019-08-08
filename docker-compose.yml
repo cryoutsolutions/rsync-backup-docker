@@ -1,0 +1,49 @@
+version: "3.4"
+# #############
+# DEFAULTS
+# #############
+x-defaults: &defaults
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        cpus: "2"
+        memory: 2048M
+      reservations:
+        memory: 512M
+  networks:
+    - default
+# #############
+# SERVICES
+# #############
+services:
+  backup-internal:
+    <<: *defaults
+    image: thankyoupayroll/rsnapshot-docker
+    volumes:
+      - /data/to/backup:/data
+      - /backup/output/folder:/backup
+    environment:
+      - BACKUP_NAME=localhost
+      # - BACKUP_OPTS=
+      # - BACKUP_HOURLY=0
+      # - BACKUP_DAILY=3
+      # - BACKUP_WEEKLY=3
+      # - BACKUP_MONTHLY=3
+      # - BACKUP_YEARLY=3
+  backup-remote:
+    <<: *defaults
+    image: thankyoupayroll/rsnapshot-docker
+    volumes:
+      - /backup/output/folder:/backup
+      - ${HOME}/.ssh/id_rsa:/ssh-id
+    environment:
+      - BACKUP_NAME=remote
+      # - BACKUP_OPTS=
+      - BACKUP_SOURCE=${REMOTE_USER}@${REMOTE_HOSTNAME}:${REMOTE_FOLDER}
+      # - BACKUP_SSH_ARGS=
+      # - BACKUP_HOURLY=0
+      # - BACKUP_DAILY=3
+      # - BACKUP_WEEKLY=3
+      # - BACKUP_MONTHLY=3
+      # - BACKUP_YEARLY=3
