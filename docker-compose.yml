@@ -19,7 +19,7 @@ x-defaults: &defaults
 services:
   backup-internal:
     <<: *defaults
-    image: thankyoupayroll/rsnapshot-docker
+    image: thankyoupayroll/rsync-backup-docker
     volumes:
       - /data/to/backup:/data
       - /backup/output/folder:/backup
@@ -33,7 +33,7 @@ services:
       # - BACKUP_YEARLY=3
   backup-remote:
     <<: *defaults
-    image: thankyoupayroll/rsnapshot-docker
+    image: thankyoupayroll/rsync-backup-docker
     volumes:
       - /backup/output/folder:/backup
       - ${HOME}/.ssh/id_rsa:/ssh-id

@@ -1,65 +1,34 @@
 #! /bin/sh
 
-LOG_FILE=/rsnapshot-docker.log
-
-# Entry point for rsnapshot backup
-# This will create the config file (using environment variables),
-# a crontab, and start cron
-
-# First part of rsnapshot config
-cat > /etc/rsnapshot.conf <<EOF
-config_version	1.2
-snapshot_root	/backup/
-no_create_root	1
-cmd_cp		/bin/cp
-cmd_rm		/bin/rm
-cmd_rsync	/usr/bin/rsync
-cmd_ssh		/usr/bin/ssh
-ssh_args	-i /ssh-id -o StrictHostKeychecking=no ${BACKUP_SSH_ARGS}
-verbose		1
-lockfile	/var/run/rsnapshot.pid
-backup		${BACKUP_SOURCE}	${BACKUP_NAME}/	${BACKUP_OPTS}
-EOF
+LOG_FILE=/backup-docker.log
 
 # prepare crontab for root
 touch /etc/crontabs/root
 
+source vars.sh
+
 # Dynamic parts - depending on the retain settings
 # This will also create the crontab
-if [ "${BACKUP_HOURLY}" -gt 0 ]
-then
-  echo "retain	hourly	${BACKUP_HOURLY}">> /etc/rsnapshot.conf
-  echo "0 * * * * /backup.sh hourly" >> /etc/crontabs/root
-  echo "Hourly backup job created!" > $LOG_FILE
+if [ "${BACKUP_HOURLY}" -gt 0 ]; then
+  echo "0 * * * * /backup.sh hourly >$LOG_FILE" >>/etc/crontabs/root
+  echo "Hourly backup job created!" >$LOG_FILE
 fi
-if [ "${BACKUP_DAILY}" -gt 0 ]
-then
-  echo "retain	daily	${BACKUP_DAILY}">> /etc/rsnapshot.conf
-  echo "50 0 * * * /backup.sh daily" >> /etc/crontabs/root
-  echo "Daily backup job created!" > $LOG_FILE
+if [ "${BACKUP_DAILY}" -gt 0 ]; then
+  echo "50 0 * * * /backup.sh daily >$LOG_FILE" >>/etc/crontabs/root
+  echo "Daily backup job created!" >$LOG_FILE
 fi
-if [ "${BACKUP_WEEKLY}" -gt 0 ]
-then
-  echo "retain	weekly	${BACKUP_WEEKLY}">> /etc/rsnapshot.conf
-  echo "50 11 * * 0 /backup.sh weekly" >> /etc/crontabs/root
-  echo "Weekly backup job created!" > $LOG_FILE
+if [ "${BACKUP_WEEKLY}" -gt 0 ]; then
+  echo "50 11 * * 0 /backup.sh weekly >$LOG_FILE" >>/etc/crontabs/root
+  echo "Weekly backup job created!" >$LOG_FILE
 fi
-if [ "${BACKUP_MONTHLY}" -gt 0 ]
-then
-  echo "retain	monthly	${BACKUP_MONTHLY}">> /etc/rsnapshot.conf
-  echo "50 12 1 * * /backup.sh monthly" >> /etc/crontabs/root
-  echo "Monthly backup job created!" > $LOG_FILE
+if [ "${BACKUP_MONTHLY}" -gt 0 ]; then
+  echo "50 12 1 * * /backup.sh monthly >$LOG_FILE" >>/etc/crontabs/root
+  echo "Monthly backup job created!" >$LOG_FILE
 fi
-if [ "${BACKUP_YEARLY}" -gt 0 ]
-then
-  echo "retain	yearly	${BACKUP_YEARLY}">> /etc/rsnapshot.conf
-  echo "50 13 1 1 * /backup.sh yearly" >> /etc/crontabs/root
-  echo "Yearly backup job created!" > $LOG_FILE
+if [ "${BACKUP_YEARLY}" -gt 0 ]; then
+  echo "50 13 1 1 * /backup.sh yearly >$LOG_FILE" >>/etc/crontabs/root
+  echo "Yearly backup job created!" >$LOG_FILE
 fi
-
-# Add the user-provided config file
-cat /backup.cfg >> /etc/rsnapshot.conf
 
 # start cron - we should be done!
 /usr/sbin/crond -f
-
