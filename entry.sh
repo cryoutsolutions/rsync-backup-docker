@@ -5,7 +5,7 @@ LOG_FILE=/backup-docker.log
 # prepare crontab for root
 touch /etc/crontabs/root
 
-source vars.sh
+source /vars.sh
 
 # Dynamic parts - depending on the retain settings
 # This will also create the crontab

@@ -19,7 +19,7 @@ FORMAT="%Y%m%d-%H%M"
 TYPE=$1
 ROOT_DIR=$(pwd)
 
-source vars.sh
+source /vars.sh
 
 calculate() {
   local expression=$1
