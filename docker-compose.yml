@@ -64,7 +64,7 @@ services:
     environment:
       - BACKUP_NAME=comel
       # - BACKUP_OPTS=
-      - BACKUP_SOURCE=adu@ubuntu22comel.comel.tainic.ro:/home/adu/prod/stocuri/automysqlbackup/backup/
+      - BACKUP_SOURCE=adu@ubuntu22comel.comel.tainic.ro:/home/adu/prod/stocuri/automysqlbackup/backup/latest
       - BACKUP_SSH_ARGS=-p 22 -i /ssh-id -o "StrictHostKeyChecking no"
       - BACKUP_RSYNC_ARGS=-Paxuv --delete --no-o --no-g --no-perms --exclude node_modules --exclude .pnpm
       #- BACKUP_RSYNC_ARGS=-Paxuv --no-o --no-g --no-perms --exclude "node_modules" --exclude ".pnpm"
