@@ -11,39 +11,63 @@ x-defaults: &defaults
         memory: 2048M
       reservations:
         memory: 512M
+  volumes:
+      - ./backup:/backup
+      - ./keys/id_rsa:/ssh-id
+      - ./backup.sh:/backup.sh
+      - /var/tmp:/var/tmp
+      #- /usr/local/bin/write-node-exporter-metric:/usr/local/bin/write-node-exporter-metric
   networks:
     - default
 # #############
 # SERVICES
 # #############
 services:
-  backup-internal:
-    <<: *defaults
-    image: thankyoupayroll/rsync-backup-docker
-    volumes:
-      - /data/to/backup:/data
-      - /backup/output/folder:/backup
-    environment:
-      - BACKUP_NAME=localhost
+  #backup-internal:
+  #  <<: *defaults
+  #  image: thankyoupayroll/rsync-backup-docker
+  #  volumes:
+  #    - /data/to/backup:/data
+  #    - /backup/output/folder:/backup
+  #  environment:
+  #    - BACKUP_NAME=localhost
       # - BACKUP_OPTS=
       # - BACKUP_HOURLY=0
       # - BACKUP_DAILY=3
       # - BACKUP_WEEKLY=3
       # - BACKUP_MONTHLY=3
       # - BACKUP_YEARLY=3
-  backup-remote:
+  backup-remote-clcom:
     <<: *defaults
-    image: thankyoupayroll/rsync-backup-docker
-    volumes:
-      - /backup/output/folder:/backup
-      - ${HOME}/.ssh/id_rsa:/ssh-id
+    hostname: backup-remote-clcom
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
-      - BACKUP_NAME=remote
+      - BACKUP_NAME=chatwoot
       # - BACKUP_OPTS=
-      - BACKUP_SOURCE=${REMOTE_USER}@${REMOTE_HOSTNAME}:${REMOTE_FOLDER}
-      # - BACKUP_SSH_ARGS=
-      # - BACKUP_HOURLY=0
-      # - BACKUP_DAILY=3
-      # - BACKUP_WEEKLY=3
-      # - BACKUP_MONTHLY=3
-      # - BACKUP_YEARLY=3
+      - BACKUP_SOURCE=root@s6.dev.tainic.ro:/home/hop/prod/chatwoot/
+      - BACKUP_SSH_ARGS=-p 58963 -i /ssh-id -o "StrictHostKeyChecking no"
+      #- BACKUP_RSYNC_ARGS=-Paxuv --no-o --no-g --no-perms --exclude "node_modules" --exclude ".pnpm"
+      - BACKUP_HOURLY=0
+      - BACKUP_DAILY=3
+      - BACKUP_WEEKLY=3
+      - BACKUP_MONTHLY=3
+      - BACKUP_YEARLY=3
+  backup-remote-comel:
+    <<: *defaults
+    hostname: backup-remote-comel
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - BACKUP_NAME=comel
+      # - BACKUP_OPTS=
+      - BACKUP_SOURCE=adu@ubuntu22comel.comel.tainic.ro:/home/adu/prod/stocuri/automysqlbackup/backup/
+      - BACKUP_SSH_ARGS=-p 22 -i /ssh-id -o "StrictHostKeyChecking no"
+      #- BACKUP_RSYNC_ARGS=-Paxuv --no-o --no-g --no-perms --exclude "node_modules" --exclude ".pnpm"
+      - BACKUP_HOURLY=0
+      - BACKUP_DAILY=3
+      - BACKUP_WEEKLY=3
+      - BACKUP_MONTHLY=3
+      - BACKUP_YEARLY=3

@@ -73,9 +73,12 @@ update_backup() {
   local output=$2
   local remote=$3
   local options=${4:-"-Paxuv --no-o --no-g --no-perms"}
+  #echo $options;
+  #echo $4;
   if [ "$remote" == true ]; then
     BACKUP_SSH_ARGS=${BACKUP_SSH_ARGS:-"-i /ssh-id -o \"StrictHostKeyChecking no\""}
     rsync $options -e "ssh $BACKUP_SSH_ARGS" $source $output
+    echo rsync $options -e "ssh $BACKUP_SSH_ARGS" $source $output
   else
     rsync $options $source $output
   fi
