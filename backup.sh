@@ -72,13 +72,15 @@ update_backup() {
   local source=$1
   local output=$2
   local remote=$3
-  local options=${4:-"-Paxuv --no-o --no-g --no-perms"}
+  local args=$4
+  local options=${4:-"-Paxuv --no-o --no-g --no-perms --exclude node_modules --exclude .pnpm"}
   #echo $options;
-  #echo $4;
+  #echo $args;
+
   if [ "$remote" == true ]; then
     BACKUP_SSH_ARGS=${BACKUP_SSH_ARGS:-"-i /ssh-id -o \"StrictHostKeyChecking no\""}
     rsync $options -e "ssh $BACKUP_SSH_ARGS" $source $output
-    echo rsync $options -e "ssh $BACKUP_SSH_ARGS" $source $output
+    #echo rsync $options -e "ssh $BACKUP_SSH_ARGS" $source $output
   else
     rsync $options $source $output
   fi
@@ -105,13 +107,13 @@ yearly) BACKUP_LIMIT=$BACKUP_YEARLY ;;
   ;;
 esac
 
-BACKUP_OUTPUT=$BACKUP_PATH/$BACKUP_NAME/$TYPE
+BACKUP_OUTPUT=$BACKUP_PATH/$hostname/$TYPE
 BACKUP_LIMIT=$(calculate "$BACKUP_LIMIT - 1")
 FOLDERS_TO_MOVE=$(calculate "$BACKUP_LIMIT - 1")
 
 echo "Backing up: $BACKUP_SOURCE"
 
-init_folder $BACKUP_PATH $BACKUP_NAME
+init_folder $BACKUP_PATH $hostname
 
 remove_folder $BACKUP_OUTPUT $BACKUP_LIMIT
 while [ $FOLDERS_TO_MOVE -gt 0 ]; do
@@ -120,7 +122,7 @@ while [ $FOLDERS_TO_MOVE -gt 0 ]; do
 done
 mirror_folder $BACKUP_OUTPUT
 
-update_backup $BACKUP_SOURCE $BACKUP_OUTPUT.0 $IS_REMOTE $BACKUP_RSYNC_ARGS
+update_backup $BACKUP_SOURCE $BACKUP_OUTPUT.0 $IS_REMOTE "$BACKUP_RSYNC_ARGS"
 
 if [ "$BACKUP_COMPRESS" = true ]; then
   secure_compress $BACKUP_OUTPUT.0 "$BACKUP_OUTPUT-$(date +"$FORMAT")" $BACKUP_PASSWORD

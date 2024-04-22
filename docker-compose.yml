@@ -37,9 +37,9 @@ services:
       # - BACKUP_WEEKLY=3
       # - BACKUP_MONTHLY=3
       # - BACKUP_YEARLY=3
-  backup-remote-clcom:
+  backup-chatwoot:
     <<: *defaults
-    hostname: backup-remote-clcom
+    hostname: backup-chatwoot
     build:
       context: .
       dockerfile: Dockerfile
@@ -49,14 +49,15 @@ services:
       - BACKUP_SOURCE=root@s6.dev.tainic.ro:/home/hop/prod/chatwoot/
       - BACKUP_SSH_ARGS=-p 58963 -i /ssh-id -o "StrictHostKeyChecking no"
       #- BACKUP_RSYNC_ARGS=-Paxuv --no-o --no-g --no-perms --exclude "node_modules" --exclude ".pnpm"
+      - BACKUP_RSYNC_ARGS=-Paxuv --delete --no-o --no-g --no-perms --exclude node_modules --exclude .pnpm
       - BACKUP_HOURLY=0
       - BACKUP_DAILY=3
       - BACKUP_WEEKLY=3
       - BACKUP_MONTHLY=3
       - BACKUP_YEARLY=3
-  backup-remote-comel:
+  backup-comel:
     <<: *defaults
-    hostname: backup-remote-comel
+    hostname: backup-comel
     build:
       context: .
       dockerfile: Dockerfile
@@ -65,6 +66,7 @@ services:
       # - BACKUP_OPTS=
       - BACKUP_SOURCE=adu@ubuntu22comel.comel.tainic.ro:/home/adu/prod/stocuri/automysqlbackup/backup/
       - BACKUP_SSH_ARGS=-p 22 -i /ssh-id -o "StrictHostKeyChecking no"
+      - BACKUP_RSYNC_ARGS=-Paxuv --delete --no-o --no-g --no-perms --exclude node_modules --exclude .pnpm
       #- BACKUP_RSYNC_ARGS=-Paxuv --no-o --no-g --no-perms --exclude "node_modules" --exclude ".pnpm"
       - BACKUP_HOURLY=0
       - BACKUP_DAILY=3
